@@ -2,6 +2,8 @@ import pyads
 import socket
 import sys
 
+#Ez egy teszt komment
+
 #ZSAMO Server config
 HOST = '192.168.1.121'                 # Symbolic name meaning all available interfaces
 PORT = 50007              # Arbitrary non-privileged port
