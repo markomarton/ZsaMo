@@ -22,22 +22,37 @@ plc.open()
 
 
 #Motor dictionary
-mot_dict = {}                                #motor dictionary: tartalmazza a motor száma - motor objektum párosokat
-for i in config.sections():            #végigemegyünk minden key-en az ini file-ban
+mot_dict = {}                                    #motor dictionary: tartalmazza a motor száma - motor objektum párosokat
+for i in config.sections():                      #végigemegyünk minden key-en az ini file-ban
     if 'type' in config[i]:
-        if config[i]['type'] == '"BCKHFF_MO"':            #ellenörzi hogy motor e amit kiolvasunk az ini file-ból
-            mn = config[i]                 #motor name
+        if config[i]['type'] == '"BCKHFF_MO"':   #ellenörzi hogy motor e amit kiolvasunk az ini file-ból
+            mn = config[i]                       #motor name
+            
+            #előzetes adat
+            SoftLimitLow = float("-inf")
+            SoftLimitHigh = float("inf")
+            Speed = -1.0
+            Acceleration = -1.0
+            Deceleration = -1.0
+            Backlash = 0.0
+            
+            #adat meglétének vizsgálta és cseréje
+            if 'SoftLimitLow' in mn: SoftLimitLow = float(mn['SoftLimitLow'])
+            if 'SoftLimitHigh' in mn: SoftLimitHigh = float(mn['SoftLimitHigh'])
+            if 'Speed' in mn: Speed = float(mn['Speed'])
+            if 'Acceleration' in mn: Acceleration = float(mn['Acceleration'])
+            if 'Deceleration' in mn: Deceleration = float(mn['Deceleration'])
+            if 'Backlash' in mn: Backlash = float(mn['Backlash'])
+            
             mot_dict[i] = BckhMotor.BckhMotor(plc, mn['MotNum'], mn['unit'], mn['AbsoluteEnc'],
-                                                    float(mn['SoftLimitLow']),float(mn['SoftLimitHigh']), float(mn['Speed']),
-                                                    float(mn['Acceleration']),float(mn['Deceleration']), float(mn['Backlash']))
+                                              SoftLimitLow, SoftLimitHigh, Speed, Acceleration, Deceleration, Backlash)
+
+
 
 #Plc-be irom GVL- könyvtárba
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen(1)
-
-
-
 
 while 1:
     conn, addr = s.accept()
