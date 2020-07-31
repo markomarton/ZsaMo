@@ -25,3 +25,5 @@ data = sock.recv(1024)
 print(data.decode('ascii'))
 
 sock.close()
+
+pass
