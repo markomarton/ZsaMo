@@ -1,32 +1,43 @@
 import pyads
 import socket
-import sys
+import configparser
+import BckhMotor
+import argparse
 
-#Ez egy teszt komment
+
+config = configparser.ConfigParser()
+config.read('conf.ini')                          #conf.ini beolvasása
 
 #ZSAMO Server config
-HOST = '192.168.1.121'                 # Symbolic name meaning all available interfaces
-PORT = 50007              # Arbitrary non-privileged port
+HOST = config['ZSAMO_SERVER']['IP']              # Symbolic name meaning all available interfaces
+PORT = config['ZSAMO_SERVER']['port']            # Arbitrary non-privileged port
 
-#Motor config
-speed = 30
-target_position_1 = 500
-target_position_2 = 0
-acceleration = 100
-deceleration = 100
+ADSaddr = config['ADS_COMMUNICATION']['ADSaddr']  
+ADSport = int(config['ADS_COMMUNICATION']['ADSport'])
 
 #Initialize PLC
-plc = pyads.Connection("5.59.19.32.1.1", 852)
+plc = pyads.Connection(ADSaddr, ADSport)
 plc.open()
-plc.write_by_name("GVL.axes[1].control.bEnable", True, pyads.PLCTYPE_BOOL)
-plc.write_by_name("GVL.axes[1].config.fVelocity", speed, pyads.PLCTYPE_LREAL)
-plc.write_by_name("GVL.axes[1].config.fAcceleration", acceleration, pyads.PLCTYPE_LREAL)
-plc.write_by_name("GVL.axes[1].config.fDeceleration", deceleration, pyads.PLCTYPE_LREAL)
-plc.write_by_name("GVL.axes[1].control.eCommand", 0, pyads.PLCTYPE_INT)
 
+
+
+#Motor dictionary
+mot_dict = {}                                #motor dictionary: tartalmazza a motor száma - motor objektum párosokat
+for i in config.sections():            #végigemegyünk minden key-en az ini file-ban
+    if 'type' in config[i]:
+        if config[i]['type'] == '"BCKHFF_MO"':            #ellenörzi hogy motor e amit kiolvasunk az ini file-ból
+            mn = config[i]                 #motor name
+            mot_dict[i] = BckhMotor.BckhMotor(plc, mn['MotNum'], mn['unit'], mn['AbsoluteEnc'],
+                                                    float(mn['SoftLimitLow']),float(mn['SoftLimitHigh']), float(mn['Speed']),
+                                                    float(mn['Acceleration']),float(mn['Deceleration']), float(mn['Backlash']))
+
+#Plc-be irom GVL- könyvtárba
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
 s.listen(1)
+
+
+
 
 while 1:
     conn, addr = s.accept()
@@ -36,25 +47,43 @@ while 1:
         #print ('Connected by'+ addr[0])
         tmpdata = conn.recv(1024)
         data = tmpdata.decode('ascii')
+        motor_name = data
         if not data: break
 
-        print(data)
+
+        #parser létrehozása
+        parser = argparse.ArgumentParser()
+        parser.add_argument('task', help = 'A feladat.')
+        parser.add_argument('-a','--axisName' ,help = 'A tengely nevét kéri.')
+        parser.add_argument('-t','--targetPos', type = int, help = 'A tengely új helyét kéri.')
+        parser.add_argument('-m','--movingAx', help = 'Lekéri egy vagy az összes tengely mozgásállaptát.')
+        args = parser.parse_args(data.split())
+
+        #Lekéri ehy adott tengely állását.
+        if args.task == 'getPos':
+            conn.sendall(mot_dict[args.axisName].getPosition().encode('ascii'))
+
+        #Adott pozícióba állítja a tengelyt.
+        if args.task == 'move':
+            if mot_dict[args.axisName].move(args.targetPos):
+                conn.sendall('ACK;'.encode('ascii'))
+
+        # Lekéri egy vagy az összes tengely mozgásállaptát.
+        if args.task == 'isMoving':
+
+            if args.movingAx: #Lekéri egy tengely mozgásállaptát.
+                if mot_dict[args.movingAx].moving():
+                    conn.sendall('The {} axis is moving'.format(args.movingAx).encode('ascii'))
+                else:
+                    conn.sendall('The {} axis is not moving'.format(args.movingAx).encode('ascii'))
         
-        if data == "V1,Status":
-            reply = 'V1,'
-            reply += str(plc.read_by_name("GVL.axes[1].status.bBusy", pyads.PLCTYPE_BOOL))
-            reply += ','
-            reply += str(plc.read_by_name("GVL.axes[1].status.nErrorID", pyads.PLCTYPE_UDINT))
-            reply += ','
-            reply += "{:.2f}".format(plc.read_by_name("GVL.axes[1].status.fActPosition", pyads.PLCTYPE_LREAL))
-            reply += ','
-            reply += str(plc.read_by_name("GVL.axes[1].config.fPosition", pyads.PLCTYPE_LREAL))
-            reply += ';'
-            conn.sendall(reply.encode('ascii'))
-        else:
-            tmp=data.split(',')
-            plc.write_by_name("GVL.axes[1].config.fPosition", float(tmp[1]), pyads.PLCTYPE_LREAL)
-            plc.write_by_name("GVL.axes[1].control.bExecute", True, pyads.PLCTYPE_BOOL)
-            conn.sendall('ACK;'.encode('ascii'))
-    
+            else: #Lekéri az összes tengely mozgásállaptát.  
+                reply='Moving axis: '
+                for nev in mot_dict.keys:
+                    if mot_dict[nev].moving:
+                        reply += nev + ', '
+                if reply == 'Moving axis: ': #ellenörzés: ha minden tengely áll
+                    reply = 'There are no moving axis.**'  
+                conn.sendall(reply[0:-2].encode('ascii'))
+
 plc.close()
