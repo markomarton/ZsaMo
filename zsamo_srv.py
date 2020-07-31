@@ -95,7 +95,7 @@ while 1:
             else: #Lekéri az összes tengely mozgásállaptát.  
                 reply='Moving axis: '
                 for nev in mot_dict.keys:
-                    if mot_dict[nev].moving:
+                    if mot_dict[nev].moving():
                         reply += nev + ', '
                 if reply == 'Moving axis: ': #ellenörzés: ha minden tengely áll
                     reply = 'There are no moving axis.**'  
