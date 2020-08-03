@@ -49,7 +49,7 @@ class BckhMotor:
         reply += ','
         reply += str(self.lc.read_by_name("GVL.axes[{}].status.nErrorID".format(self.MotNum), pyads.PLCTYPE_UDINT))
         reply += ','
-        reply += "{:.2f}".format(self.plc.read_by_name("GVL.axes[{}].status.fActPosition".format(self.MotNum), pyads.PLCTYPE_LREAL))
+        reply += "{:.2f}".format(float(self.plc.read_by_name("GVL.axes[{}].status.fActPosition".format(self.MotNum), pyads.PLCTYPE_LREAL)))
         reply += ','
         reply += str(self.plc.read_by_name("GVL.axes[{}].config.fPosition".format(self.MotNum), pyads.PLCTYPE_LREAL))
         reply += ';'
