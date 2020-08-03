@@ -65,6 +65,9 @@ class BckhMotor:
 
     def moving(self):
         return self.plc.read_by_name("GVL.axes[{}].status.bBusy".format(self.MotNum), pyads.PLCTYPE_BOOL)
+    
+    def stop(self):
+        self.plc.write_by_name("GVL.axes[{}].control.bStop".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
 
 
 
