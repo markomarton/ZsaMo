@@ -6,7 +6,7 @@ import argparse
 
 
 config = configparser.ConfigParser()
-config.read('conf.ini')                          #conf.ini beolvasása
+config.read('ATOS_conf.ini')                          #conf.ini beolvasása
 
 #ZSAMO Server config
 HOST = config['ZSAMO_SERVER']['IP']              # Symbolic name meaning all available interfaces
@@ -14,13 +14,10 @@ PORT = int(config['ZSAMO_SERVER']['port'])       # Arbitrary non-privileged port
 
 ADSaddr = config['ADS_COMMUNICATION']['ADSaddr']  
 ADSport = int(config['ADS_COMMUNICATION']['ADSport'])
-AAAAAAA = config['ADS_COMMUNICATION']['AAAAAAA'] #AAAAAAA is a placeholder
+ADS_IP = config['ADS_COMMUNICATION']['ADS_IP']
 
 #Initialize PLC
-with pyads.Connection(ADSaddr, ADSport, AAAAAAA) as plc:
-    plc.open()  #nem tudom hogy kell-e
-    
-    
+with pyads.Connection(ADSaddr, ADSport, ADS_IP) as plc:
     
     #Motor dictionary
     mot_dict = {}                                    #motor dictionary: key-motor name - value-motor object
@@ -45,7 +42,7 @@ with pyads.Connection(ADSaddr, ADSport, AAAAAAA) as plc:
                 if 'Deceleration' in mn: Deceleration = float(mn['Deceleration'])
                 if 'Backlash' in mn: Backlash = float(mn['Backlash'])
                 
-                mot_dict[i] = BckhMotor.BckhMotor(plc, mn['MotNum'], mn['unit'], mn['AbsoluteEnc'],
+                mot_dict[i] = BckhMotor.BckhMotor(plc, mot_dict[i], mn['MotNum'], mn['unit'], mn['AbsoluteEnc'],
                                                   SoftLimitLow, SoftLimitHigh, Speed, Acceleration, Deceleration, Backlash)
     
     
@@ -111,7 +108,3 @@ with pyads.Connection(ADSaddr, ADSport, AAAAAAA) as plc:
                     for nev in mot_dict.keys():
                         mot_dict[nev].stop()
                 conn.sendall('The movement is stoped.'.encode('ascii'))
-                
-    
-                
-    plc.close()

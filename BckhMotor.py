@@ -4,7 +4,7 @@ import pyads
 
 class BckhMotor:
     #Constructor of Class
-    def __init__(self, plc,
+    def __init__(self, plc, MotName,
                  MotNum, # [int] Number of motor in PLC
                  unit,   # [string] Unit 
                  AbsEnc, # [bool] is it absolute?
@@ -20,6 +20,7 @@ class BckhMotor:
         self.Acc = Acc
         self.Dec = Dec
         self.BckLash = BckLash
+        self.MotName = MotName
 
         plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
 
@@ -44,7 +45,7 @@ class BckhMotor:
 
 
     def getPosition(self):
-        reply = 'V1,'
+        reply = 'Positon: ' + self.MotName + ' ,'
         reply += str(self.plc.read_by_name("GVL.axes[{}].status.bBusy".format(self.MotNum), pyads.PLCTYPE_BOOL))
         reply += ','
         reply += str(self.lc.read_by_name("GVL.axes[{}].status.nErrorID".format(self.MotNum), pyads.PLCTYPE_UDINT))
