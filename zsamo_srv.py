@@ -4,9 +4,9 @@ import configparser
 import BckhMotor
 import argparse
 
-
+ini_name = 'ATHOS_conf'
 config = configparser.ConfigParser()
-config.read('ATOS_conf.ini')                          #conf.ini beolvasása
+config.read('{}.ini'.format(ini_name))                          #conf.ini beolvasása
 
 #ZSAMO Server config
 HOST = config['ZSAMO_SERVER']['IP']              # Symbolic name meaning all available interfaces
@@ -107,4 +107,9 @@ with pyads.Connection(ADSaddr, ADSport, ADS_IP) as plc:
                 else: 
                     for nev in mot_dict.keys():
                         mot_dict[nev].stop()
-                conn.sendall('The movement is stoped.'.encode('ascii'))
+                conn.sendall('All movements are stopped.'.encode('ascii'))
+                
+            #restart after emergency shutdown
+            if args.task == 'restart':
+                for nev in mot_dict.keys():
+                        mot_dict[nev].restart()

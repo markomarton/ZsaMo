@@ -48,7 +48,7 @@ class BckhMotor:
         reply = 'Positon: ' + self.MotName + ' ,'
         reply += str(self.plc.read_by_name("GVL.axes[{}].status.bBusy".format(self.MotNum), pyads.PLCTYPE_BOOL))
         reply += ','
-        reply += str(self.lc.read_by_name("GVL.axes[{}].status.nErrorID".format(self.MotNum), pyads.PLCTYPE_UDINT))
+        reply += str(self.plc.read_by_name("GVL.axes[{}].status.nErrorID".format(self.MotNum), pyads.PLCTYPE_UDINT))
         reply += ','
         reply += "{:.2f}".format(float(self.plc.read_by_name("GVL.axes[{}].status.fActPosition".format(self.MotNum), pyads.PLCTYPE_LREAL)))
         reply += ','
@@ -69,7 +69,9 @@ class BckhMotor:
     
     def stop(self):
         self.plc.write_by_name("GVL.axes[{}].control.bStop".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
-
+        
+    def restart(self)
+        self.plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
 
 
 
