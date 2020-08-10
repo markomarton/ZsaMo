@@ -23,8 +23,6 @@ for i in config.sections():                   #checkint for motor names in the i
                                               data['Acceleration'], data['Deceleration'], data['Backlash'])
 
 
-
-
 while 1:
     conn, addr = s.accept()
     print ('Connected by'+ addr[0])
