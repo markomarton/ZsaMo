@@ -7,9 +7,17 @@ class connection:
         self.iniName = iniName
         self.config = configparser.ConfigParser()
         self.config.read('{}.ini'.format(self.iniName))
-        return self.config
+        
+    def nameList(self):
+        l = []
+        for i in self.config.sections():                   #checkint for motor names in the ini file
+            if 'type' in self.config[i]:
+                if self.config[i]['type'] == '"BCKHFF_MO"':
+                    l.append(i)
+        return l
+
     
-    def connect(self):
+    def plc(self):
         HOST = self.config[self.config]['IP']              # Symbolic name meaning all available interfaces
         PORT = int(self.config['ZSAMO_SERVER']['port'])
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,15 +25,15 @@ class connection:
         s.listen(1)
         return s
         
-    def ads(self):
+    def TAS(self):
         ADSaddr = self.config['ADS_COMMUNICATION']['ADSaddr']  
         ADSport = int(self.config['ADS_COMMUNICATION']['ADSport'])
         ADS_IP = self.config['ADS_COMMUNICATION']['ADS_IP']
 
         return pyads.Connection(ADSaddr, ADSport, ADS_IP)
     
-    def data(self,motName):
-        data ={'name':motName,'MotNum':self.config('MotNum'),'unit':self.config('unit'), 'AbsoluteEnc':self.config('AbsoluteEnc')}
+    def data(self,motName):        
+        data ={'name':motName,'MotNum':self.config[motName]['MotNum'],'unit':self.config[motName]['unit'], 'AbsoluteEnc':self.config[motName]['AbsoluteEnc']}
         mn = self.config[motName]                       #motor name
         
         #előzetes adat

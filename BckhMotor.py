@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-#Motor class for the Beckhoff PLC motors
-import pyads
+
 
 class BckhMotor:
     #Constructor of Class
@@ -23,7 +21,7 @@ class BckhMotor:
         self.MotName = MotName
 
         plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
-
+        
         if Speed>0:
             plc.write_by_name("GVL.axes[{}].config.fVelocity".format(self.MotNum), Speed, pyads.PLCTYPE_LREAL)
         else:
@@ -70,7 +68,7 @@ class BckhMotor:
     def stop(self):
         self.plc.write_by_name("GVL.axes[{}].control.bStop".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
         
-    def restart(self)
+    def restart(self):
         self.plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
 
 

@@ -1,4 +1,3 @@
-import pyads
 import socket
 import configparser
 import BckhMotor
@@ -6,21 +5,17 @@ import argparse
 import connection
 
 ini_name = 'ATHOS_conf'
-                        #conf.ini beolvasása
-config = configparser.ConfigParser()
-config = connection.connection(ini_name)
+con = connection.connection(ini_name)
 
-s = connection.connection.connect()
-PLC = connection.cnonection.ads()
+s = con.TAS()
+PLC = con.plc()
 
 mot_dict = {}                                    #motor dictionary: key-motor name - value-motor object
-for i in config.sections():                   #checkint for motor names in the ini file
-    if 'type' in config[i]:
-        if config[i]['type'] == '"BCKHFF_MO"':
-            data=connection.connection.data(i)          
-            mot_dict[i] = BckhMotor.BckhMotor(PLC, data['name'], data['MotNum'], data['unit'], data['AbsoluteEnc'],
-                                              data['SoftLimitLow'], data['SoftLimitHigh'], data['Speed'],
-                                              data['Acceleration'], data['Deceleration'], data['Backlash'])
+for i in con.nameList():                         #checkint for motor names in the ini file 
+    data=con.data(i)          
+    mot_dict[i] = BckhMotor.BckhMotor(PLC, data['name'], data['MotNum'], data['unit'], data['AbsoluteEnc'],
+                                      data['SoftLimitLow'], data['SoftLimitHigh'], data['Speed'],
+                                      data['Acceleration'], data['Deceleration'], data['Backlash'])
 
 
 while 1:
