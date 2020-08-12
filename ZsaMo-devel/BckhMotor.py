@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+#Motor class for the Beckhoff PLC motors
 import pyads
 
 class BckhMotor:
     #Constructor of Class
+    print('alma')
     def __init__(self, plc, MotName,
                  MotNum, # [int] Number of motor in PLC
                  unit,   # [string] Unit 
@@ -21,7 +24,7 @@ class BckhMotor:
         self.MotName = MotName
 
         plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
-        
+
         if Speed>0:
             plc.write_by_name("GVL.axes[{}].config.fVelocity".format(self.MotNum), Speed, pyads.PLCTYPE_LREAL)
         else:
@@ -40,7 +43,14 @@ class BckhMotor:
 
         plc.write_by_name("GVL.axes[{}].control.eCommand".format(self.MotNum), 0, pyads.PLCTYPE_INT)
         pass
-
+    
+    def mn(self):
+        l = []
+        for i in self.config.sections():                   #checkint for motor names in the ini file
+            if 'type' in self.config[i]:
+                if self.config[i]['type'] == '"BCKHFF_MO"':
+                    l.append(i)
+        return l
 
     def getPosition(self):
         reply = 'Positon: ' + self.MotName + ' ,'
