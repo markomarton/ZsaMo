@@ -17,7 +17,7 @@ for i in con.nameList():                         #checkint for motor names in th
                                       data['SoftLimitLow'], data['SoftLimitHigh'], data['Speed'],
                                       data['Acceleration'], data['Deceleration'], data['Backlash'])
 
-
+PLC.open()
 while 1:
     conn, addr = s.accept()
     print ('Connected by'+ addr[0])

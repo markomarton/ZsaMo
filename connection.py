@@ -29,7 +29,6 @@ class connection:
         ADSaddr = self.config['ADS_COMMUNICATION']['ADSaddr']  
         ADSport = int(self.config['ADS_COMMUNICATION']['ADSport'])
         ADS_IP = self.config['ADS_COMMUNICATION']['ADS_IP']
-
         return pyads.Connection(ADSaddr, ADSport, ADS_IP)
     
     def data(self,motName):        
