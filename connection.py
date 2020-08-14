@@ -51,4 +51,6 @@ class connection:
         if 'Deceleration' in mn: data['Deceleration'] = float(mn['Deceleration'])
         if 'Backlash' in mn: data['Backlash'] = float(mn['Backlash'])
         return data
+    
+    def
         
