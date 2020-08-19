@@ -1,13 +1,13 @@
-import socket
-import configparser
 import BckhMotor
 import argparse
 import connection
+import pyads
 
 ini_name = 'ATHOS_conf'
 con = connection.connection(ini_name)
+li = con.plc()
 
-with con.plc() as PLC
+with pyads.Connection(li[0], li[1], li[2]) as PLC:
     s = con.TAS()
     
     mot_dict = {}                                    #motor dictionary: key-motor name - value-motor object
