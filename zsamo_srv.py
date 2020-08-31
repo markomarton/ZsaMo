@@ -32,11 +32,17 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
     
             #parser creation
             parser = argparse.ArgumentParser()
-            parser.add_argument('task', help = 'A feladat.')
-            parser.add_argument('-a','--axisName' ,help = 'A tengely nevét kéri.')
-            parser.add_argument('-t','--targetPos', type = float, help = 'A tengely új helyét kéri.')
-            parser.add_argument('-m','--movingAx', help = 'Lekéri egy vagy az összes tengely mozgásállaptát.')
-            parser.add_argument('-s','--stopMoving', help = "It stop's the moving axis")
+            parser.add_argument('task', help = 'The task')
+            # task list:
+                # getPos: get the position of an axis
+                # move: move a target to a given position
+                # isMoving: ask for an axis status (moving[True] or not[False])
+                # stop: stops all movements
+                # restart: restart the PLC if it was phisicaly stopped (not implemented)
+                # getStatus: get the status of an axis
+            
+            parser.add_argument('-a','--axisName' ,help = 'Axis name')
+            parser.add_argument('-t','--targetPos', type = float, help = 'Move anaxis to the given position')
             args = parser.parse_args(data.split())
     
             #get the position of a certain axis
@@ -48,28 +54,17 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
                 if mot_dict[args.axisName].move(args.targetPos):
                     conn.sendall('ACK'.encode('ascii'))
     
-            #collect the status of all or only one axis
+            #collect the status an axis
             if args.task == 'isMoving':
-    
-                if args.movingAx: #collect the status of one axis
-                    if mot_dict[args.movingAx].moving():
-                        conn.sendall(True)
-                    else:
-                        conn.sendall(False)
-            
-                else: #collect the status of all axis
-                    reply='Moving axis: '
-                    for nev in mot_dict.keys():
-                        if mot_dict[nev].moving():
-                            reply += nev + ', '
-                    if reply == 'Moving axis: ':
-                        reply = 'There are no moving axis.**'  
-                    conn.sendall(reply[0:-2].encode('ascii'))
+                if mot_dict[args.axisName].moving():
+                    conn.sendall(True)
+                else:
+                    conn.sendall(False)
                     
             #stop's all or one axis movmements
             if args.task == 'stop':
-                if args.stopMoving:
-                    mot_dict[args.stopMoving].stop()
+                if args.axisName:
+                    mot_dict[args.axisName].stop()
                 else: 
                     for nev in mot_dict.keys():
                         mot_dict[nev].stop()
@@ -77,5 +72,10 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
                 
             #restart after emergency shutdown
             if args.task == 'restart':
-                for nev in mot_dict.keys():
-                        mot_dict[nev].restart()
+                # not correct line 
+                PLC.write_by_name("GVL.axes[].control.bEnable", True, pyads.PLCTYPE_BOOL)
+            
+            if args.tak == 'getStatus':
+                mot_dict[args.axisName].status()
+                
+                

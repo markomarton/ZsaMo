@@ -68,8 +68,9 @@ class BckhMotor:
     def stop(self):
         self.plc.write_by_name("GVL.axes[{}].control.bStop".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
         
-    def restart(self):
-        self.plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
+    def status(self):
+        #not correct line
+        self.plc.write_by_name("GVL.axes[{}].status.bStatatus".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
 
 
 
