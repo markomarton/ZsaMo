@@ -57,9 +57,9 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
             #collect the status an axis
             if args.task == 'isMoving':
                 if mot_dict[args.axisName].moving():
-                    conn.sendall(True)
+                    conn.sendall('True'.encode('ascii'))
                 else:
-                    conn.sendall(False)
+                    conn.sendall('False'.encode('ascii'))
                     
             #stop's all or one axis movmements
             if args.task == 'stop':
@@ -75,7 +75,7 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
                 # not correct line 
                 PLC.write_by_name("GVL.axes[].control.bEnable", True, pyads.PLCTYPE_BOOL)
             
-            if args.tak == 'getStatus':
+            if args.task == 'getStatus':
                 mot_dict[args.axisName].status()
                 
                 
