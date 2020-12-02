@@ -32,9 +32,72 @@ def getp(axis):
     msg = 'getPos -a '+ axis
     sock.sendall( msg.encode('ascii') )
     data = sock.recv(4096)
+    #print(data)
     sock.close()
     print(data.decode('ascii').split(',')[3])
 
+def getpfull(axis):
+    if axis not in ['monho', '2th', 'om', 'detang', 'ath']:
+        print('axis must be: monho / 2th / om / detang / ath')
+        return
+    
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect( ('192.168.88.252', 50007) )
+    
+    msg = 'getPos -a '+ axis
+    sock.sendall( msg.encode('ascii') )
+    data = sock.recv(4096)
+    print(data)
+    sock.close()
+    print(data.decode('ascii').split(',')[3])
+    
+def restart():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect( ('192.168.88.252', 50007) )
+    
+    msg = 'restart'
+    sock.sendall( msg.encode('ascii') )
+    reply = sock.recv(4096)
+    print(reply.decode('ascii'))
+    sock.close()
+    
+def stop():
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect( ('192.168.88.252', 50007) )
+    
+    msg = 'stop'
+    sock.sendall( msg.encode('ascii') )
+    reply = sock.recv(4096)
+    print(reply.decode('ascii'))
+    sock.close() 
+    
+def reset(axis=''):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect( ('192.168.88.252', 50007) )
+    
+    if axis == '':
+        msg = 'reset'
+    else:
+        msg = 'reset -a ' + axis
+    sock.sendall( msg.encode('ascii') )
+    reply = sock.recv(4096)
+    print(reply.decode('ascii'))
+    sock.close() 
+
+def homeAxis(axis):
+    if axis not in ['monho', '2th', 'om', 'detang', 'ath']:
+        print('axis must be: monho / 2th / om / detang / ath')
+        return
+    
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect( ('192.168.88.252', 50007) )
+    
+    msg = 'homeAxis -a '+ axis
+    sock.sendall( msg.encode('ascii') )
+    data = sock.recv(4096)
+    print(data)
+    sock.close()
+    
 # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # sock.connect( ('192.168.88.252', 50007) )
 

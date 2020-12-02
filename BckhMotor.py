@@ -20,7 +20,7 @@ class BckhMotor:
         self.BckLash = BckLash
         self.MotName = MotName
 
-        plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
+        #plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
         
         if Speed>0:
             plc.write_by_name("GVL.axes[{}].config.fVelocity".format(self.MotNum), Speed, pyads.PLCTYPE_LREAL)
@@ -56,6 +56,8 @@ class BckhMotor:
         pass
 
     def move(self,targetPos):
+        self.plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
+        self.plc.write_by_name("GVL.axes[{}].control.bStop".format(self.MotNum), False, pyads.PLCTYPE_BOOL)
         self.plc.write_by_name("GVL.axes[{}].control.eCommand".format(self.MotNum), 0, pyads.PLCTYPE_INT)
         self.plc.write_by_name("GVL.axes[{}].config.fPosition".format(self.MotNum), float(targetPos), pyads.PLCTYPE_LREAL)
         self.plc.write_by_name("GVL.axes[{}].control.bExecute".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
@@ -71,7 +73,14 @@ class BckhMotor:
     def status(self):
         #not correct line
         self.plc.write_by_name("GVL.axes[{}].status.bStatatus".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
-
+        
+    def reset(self):
+        self.plc.write_by_name("GVL.axes[{}].control.bReset".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
+    
+    def homeAxis(self):
+        self.plc.write_by_name("GVL.axes[{}].control.eCommand".format(self.MotNum), 10, pyads.PLCTYPE_INT) # 10 -> Motionfunctions::Home
+        self.plc.write_by_name("GVL.axes[{}].config.nHomeSeq".format(self.MotNum),  1,  pyads.PLCTYPE_UINT) # 1 -> HomeToLowLimit
+        self.plc.write_by_name("GVL.axes[{}].control.bExecute".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
 
 
 
