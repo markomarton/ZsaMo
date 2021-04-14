@@ -26,4 +26,3 @@ print(data.decode('ascii'))
 
 sock.close()
 
-pass
