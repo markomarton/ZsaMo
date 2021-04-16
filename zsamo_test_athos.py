@@ -1,6 +1,14 @@
 import socket
-import sys
-from time import sleep
+
+ZsaMoIP='192.168.88.246'
+
+def startMeas(time):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect( (ZsaMoIP, 50007) )
+    command='startMeas -T ' + str(time)
+    sock.sendall(command.encode('ascii'))
+    sock.recv(1024)
+    sock.close()
 
 def mov(axis, target):
     if axis not in ['monho', '2th', 'om', 'detang', 'ath']:
@@ -12,7 +20,7 @@ def mov(axis, target):
         return
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.88.252', 50007) )
+    sock.connect( (ZsaMoIP, 50007) )
     
     msg = 'move -a '+axis+ ' -t' + str(target)
     sock.sendall( msg.encode('ascii') )
@@ -27,7 +35,7 @@ def getp(axis):
         return
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.88.252', 50007) )
+    sock.connect( (ZsaMoIP, 50007) )
     
     msg = 'getPos -a '+ axis
     sock.sendall( msg.encode('ascii') )
@@ -42,7 +50,7 @@ def getpfull(axis):
         return
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.88.252', 50007) )
+    sock.connect( (ZsaMoIP, 50007) )
     
     msg = 'getPos -a '+ axis
     sock.sendall( msg.encode('ascii') )
@@ -53,7 +61,7 @@ def getpfull(axis):
     
 def restart():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.88.252', 50007) )
+    sock.connect( (ZsaMoIP, 50007) )
     
     msg = 'restart'
     sock.sendall( msg.encode('ascii') )
@@ -63,7 +71,7 @@ def restart():
     
 def stop():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.88.252', 50007) )
+    sock.connect( (ZsaMoIP, 50007) )
     
     msg = 'stop'
     sock.sendall( msg.encode('ascii') )
@@ -73,7 +81,7 @@ def stop():
     
 def reset(axis=''):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.88.252', 50007) )
+    sock.connect( (ZsaMoIP, 50007) )
     
     if axis == '':
         msg = 'reset'
@@ -90,7 +98,7 @@ def homeAxis(axis):
         return
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.88.252', 50007) )
+    sock.connect( (ZsaMoIP, 50007) )
     
     msg = 'homeAxis -a '+ axis
     sock.sendall( msg.encode('ascii') )

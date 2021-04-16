@@ -16,7 +16,6 @@ class connection:
                     l.append(i)
         return l
 
-    
     def TAS(self):
         HOST = self.config['ZSAMO_SERVER']['IP']              # Symbolic name meaning all available interfaces
         PORT = int(self.config['ZSAMO_SERVER']['port'])
@@ -53,4 +52,38 @@ class connection:
         if 'Backlash' in mn: data['Backlash'] = float(mn['Backlash'])
         return data
 
+    def isOTDCInstalled(self):
+        #Test if OTDC is in the config file
+        #Returns True/False
+        if 'OTDC' in self.config.sections():
+            return True
+        else:
+            return False
+        
+    def OTDCpaths(self):
+        #Return a list with folder paths [SharedFolderAddr, RemoteFolderAddr]
+        #SharedFolderAddr: Folder name on the server machine where OTDC is mounted to
+        #RemoteFolderAddr: Address of data folder on the OTDC machine
+        
+        return [self.config['OTDC']['SharedFolderAddr'], self.config['OTDC']['RemoteFolderAddr']]
+    
+    def OTDCIPandPort(self):
+        #Return a list with IP address and port of the OTDC machine
+        
+        return [self.config['OTDC']['OTDC_IP'], self.config['OTDC']['OTDC_Port']]
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         

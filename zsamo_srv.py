@@ -1,4 +1,5 @@
 import BckhMotor
+import OTDCDet
 import argparse
 import connection
 import pyads
@@ -17,6 +18,12 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
                                           data['SoftLimitLow'], data['SoftLimitHigh'], data['Speed'],
                                           data['Acceleration'], data['Deceleration'], data['Backlash'])
     
+    #Connect to OTDC detector
+    if con.isOTDCInstalled():
+        print('Found OTDC in config')
+        [SharedFolderAddr, RemoteFolderAddr] = con.OTDCpaths()
+        [OTDC_IP, OTDC_Port] = con.OTDCIPandPort()
+        detector = OTDCDet.OTDCDet(SharedFolderAddr, RemoteFolderAddr, OTDC_IP, OTDC_Port)
     
     while 1:
         conn, addr = s.accept()
@@ -40,9 +47,13 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
                 # stop: stops all movements
                 # restart: restart the PLC if it was phisicaly stopped (not implemented)
                 # getStatus: get the status of an axis
+                # startMeas: start measurement with OTDC
+                
             
             parser.add_argument('-a','--axisName' ,help = 'Axis name')
-            parser.add_argument('-t','--targetPos', type = float, help = 'Move anaxis to the given position')
+            parser.add_argument('-t','--targetPos', type = float, help = 'Move an axis to the given position')
+            parser.add_argument('-T','--measTime', type = float, help = 'Measurement time')
+            
             args = parser.parse_args(data.split())
     
             #get the position of a certain axis
@@ -95,4 +106,9 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
                     conn.sendall((args.axisName + ' axis started to go HOME.').encode('ascii'))
                 else:
                     conn.sendall('Axis name incorrect!!'.encode('ascii'))
+            
+            if args.task == 'startMeas':
+                print('Start meas for ' + str(args.measTime) + ' sec')
+                detector.startMeas('', args.measTime)
+                conn.sendall('ACK'.encode('ascii'))
                     
