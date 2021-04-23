@@ -15,7 +15,7 @@ with pyads.Connection(li[0], li[1], li[2]) as PLC:
         data=con.data(i)          
         mot_dict[i] = BckhMotor.BckhMotor(PLC, data['name'], data['MotNum'], data['unit'], data['AbsoluteEnc'],
                                           data['SoftLimitLow'], data['SoftLimitHigh'], data['Speed'],
-                                          data['Acceleration'], data['Deceleration'], data['Backlash'])
+                                          data['Acceleration'], data['Deceleration'], data['Backlash'], data['ZeroAngle'],data['Direction'])
     
     
     while 1:
