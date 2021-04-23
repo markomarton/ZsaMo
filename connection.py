@@ -43,6 +43,9 @@ class connection:
         data['Acceleration'] = -1.0
         data['Deceleration'] = -1.0
         data['Backlash'] = 0.0
+        # calculation of the physical angle Ph from the encoder angle X: Ph=(X-ZeroAngle)*Direction
+        data['ZeroAngle'] = 0.0
+        data['Direction'] = 1
         
         #optional data check
         if 'SoftLimitLow' in mn: data['SoftLimitLow'] = float(mn['SoftLimitLow'])
@@ -51,6 +54,8 @@ class connection:
         if 'Acceleration' in mn: data['Acceleration'] = float(mn['Acceleration'])
         if 'Deceleration' in mn: data['Deceleration'] = float(mn['Deceleration'])
         if 'Backlash' in mn: data['Backlash'] = float(mn['Backlash'])
+        if 'ZeroAngle' in mn: data['ZeroAngle'] = float(mn['ZeroAngle'])
+        if 'Direction' in mn: data['Direction'] = float(mn['Direction'])
         return data
 
         
