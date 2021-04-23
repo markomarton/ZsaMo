@@ -7,7 +7,9 @@ class BckhMotor:
                  unit,   # [string] Unit 
                  AbsEnc, # [bool] is it absolute?
                  SLimLow=float("-inf"), SLimHigh=float("inf"), #Soft limits
-                 Speed=-1.0, Acc=-1.0, Dec=-1.0, BckLash=0.0):
+                 Speed=-1.0, Acc=-1.0, Dec=-1.0, BckLash=0.0,
+                 ZeroAngle = 0.0, Direction = 1 # calculation the real angle
+                 ):
         self.plc = plc
         self.MotNum = MotNum
         self.unit = unit
@@ -19,6 +21,8 @@ class BckhMotor:
         self.Dec = Dec
         self.BckLash = BckLash
         self.MotName = MotName
+        self.ZeroAngle = ZeroAngle
+        self.Direction = Direction
 
         #plc.write_by_name("GVL.axes[{}].control.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
         
@@ -48,20 +52,26 @@ class BckhMotor:
         reply += ','
         reply += str(self.plc.read_by_name("GVL.astAxes[{}].stStatus.nErrorID".format(self.MotNum), pyads.PLCTYPE_UDINT))
         reply += ','
-        reply += "{:.2f}".format(float(self.plc.read_by_name("GVL.astAxes[{}].stStatus.fActPosition".format(self.MotNum), pyads.PLCTYPE_LREAL)))
+        encoderAngle = float(self.plc.read_by_name("GVL.astAxes[{}].stStatus.fActPosition".format(self.MotNum), pyads.PLCTYPE_LREAL))                             
+        reply += "{:.2f}".format(self.encoder2physicalAngle(encoderAngle))
         reply += ','
-        reply += str(self.plc.read_by_name("GVL.astAxes[{}].stControl.fPosition".format(self.MotNum), pyads.PLCTYPE_LREAL))
+        encodertargetpos = float(self.plc.read_by_name("GVL.astAxes[{}].stControl.fPosition".format(self.MotNum), pyads.PLCTYPE_LREAL))
+        reply += "{:.2f}".format(self.encoder2physicalAngle(encodertargetpos))
         reply += ';'
         return reply
         pass
 
     def move(self,targetPos):
-        self.plc.write_by_name("GVL.astAxes[{}].stControl.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
-        self.plc.write_by_name("GVL.astAxes[{}].stControl.bStop".format(self.MotNum), False, pyads.PLCTYPE_BOOL)
-        self.plc.write_by_name("GVL.astAxes[{}].stControl.eCommand".format(self.MotNum), 0, pyads.PLCTYPE_INT)
-        self.plc.write_by_name("GVL.astAxes[{}].stControl.fPosition".format(self.MotNum), float(targetPos), pyads.PLCTYPE_LREAL)
-        self.plc.write_by_name("GVL.astAxes[{}].stControl.bExecute".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
-        return True #with v1
+        if self.SLimLow< float(targetpos) and float(targetpos) < self.SLimHigh
+            realtargetPos=self.physical2encoderAngle(float(targetpos))
+            self.plc.write_by_name("GVL.astAxes[{}].stControl.bEnable".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
+            self.plc.write_by_name("GVL.astAxes[{}].stControl.bStop".format(self.MotNum), False, pyads.PLCTYPE_BOOL)
+            self.plc.write_by_name("GVL.astAxes[{}].stControl.eCommand".format(self.MotNum), 0, pyads.PLCTYPE_INT)
+            self.plc.write_by_name("GVL.astAxes[{}].stControl.fPosition".format(self.MotNum), realtargetPos, pyads.PLCTYPE_LREAL)
+            self.plc.write_by_name("GVL.astAxes[{}].stControl.bExecute".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
+            return True #with v1
+        else
+            return False
         pass
 
     def moving(self):
@@ -81,7 +91,12 @@ class BckhMotor:
         self.plc.write_by_name("GVL.astAxes[{}].stControl.eCommand".format(self.MotNum), 10, pyads.PLCTYPE_INT) # 10 -> Motionfunctions::Home
         self.plc.write_by_name("GVL.astAxes[{}].stConfig.nHomeSeq".format(self.MotNum),  1,  pyads.PLCTYPE_UINT) # 1 -> HomeToLowLimit
         self.plc.write_by_name("GVL.astAxes[{}].stControl.bExecute".format(self.MotNum), True, pyads.PLCTYPE_BOOL)
-
+    
+    def encoder2physicalAngle(self, encoderAngle):
+        return (encoderAngle - self.ZeroAngle) * self.Direction
+            
+    def physical2encoderAngle(self, physicalAngle):
+        return physicalAngle / self.Direction + self.ZeroAngle
 
 
 
